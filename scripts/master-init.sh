@@ -47,15 +47,19 @@ apt-get install -y kubelet kubeadm kubectl
 apt-mark hold kubelet kubeadm kubectl
 
 # Initialize Kubernetes cluster
-kubeadm init --pod-network-cidr=${pod_network_cidr} --apiserver-cert-extra-sans=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+PRIVATE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+kubeadm init --pod-network-cidr=${pod_network_cidr} --apiserver-advertise-address=$PRIVATE_IP
 
 # Configure kubectl for ubuntu user
 mkdir -p /home/ubuntu/.kube
 cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
 chown -R ubuntu:ubuntu /home/ubuntu/.kube
+chmod 644 /home/ubuntu/.kube/config
 
 # Configure kubectl for root
-export KUBECONFIG=/etc/kubernetes/admin.conf
+mkdir -p /root/.kube
+cp /etc/kubernetes/admin.conf /root/.kube/config
+export KUBECONFIG=/root/.kube/config
 
 # Install Flannel CNI
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
