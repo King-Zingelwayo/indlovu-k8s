@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multi-container-pod
+  labels:
+    app: multi-container
+spec:
+  containers:
+  - name: main-app
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: shared-data
+      mountPath: /usr/share/nginx/html
+  - name: sidecar
+    image: busybox:latest
+    command: ['sh', '-c', 'while true; do echo "Hello from sidecar at $(date)" > /data/index.html; sleep 10; done']
+    volumeMounts:
+    - name: shared-data
+      mountPath: /data
+  volumes:
+  - name: shared-data
+    emptyDir: {}

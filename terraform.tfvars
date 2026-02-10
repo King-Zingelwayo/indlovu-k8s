@@ -1,0 +1,10 @@
+aws_region           = "eu-west-1"
+cluster_name         = "k8s-cluster"
+master_instance_type = "t3.medium"
+worker_instance_type = "t3.medium"
+worker_count         = 1
+worker_min_size      = 1
+worker_max_size      = 3
+pod_network_cidr     = "10.244.0.0/16"
+vpc_cidr             = "10.0.0.0/16"
+kubernetes_version   = "1.28"
