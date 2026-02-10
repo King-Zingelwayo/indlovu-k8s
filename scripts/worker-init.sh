@@ -49,7 +49,13 @@ apt-mark hold kubelet kubeadm kubectl
 # Wait for master to be ready and retrieve join command
 echo "Waiting for master to initialize..."
 REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)
-for i in {1..30}; do
+
+# Install AWS CLI if not present
+if ! command -v aws &> /dev/null; then
+  apt-get install -y awscli
+fi
+
+for i in {1..60}; do
   JOIN_COMMAND=$(aws ssm get-parameter \
     --name "/k8s/${cluster_name}/join-command" \
     --with-decryption \
@@ -59,15 +65,19 @@ for i in {1..30}; do
   
   if [ -n "$JOIN_COMMAND" ] && [ "$JOIN_COMMAND" != "None" ]; then
     echo "Join command retrieved, joining cluster..."
-    sudo $JOIN_COMMAND
-    echo "Worker node joined cluster successfully!"
-    exit 0
+    eval "sudo $JOIN_COMMAND"
+    if [ $? -eq 0 ]; then
+      echo "Worker node joined cluster successfully!"
+      exit 0
+    else
+      echo "Join failed, retrying..."
+    fi
   fi
   
-  echo "Waiting for master... attempt $i/30"
-  sleep 20
+  echo "Waiting for master... attempt $i/60"
+  sleep 30
 done
 
-echo "Failed to retrieve join command from master after 10 minutes"
+echo "Failed to retrieve join command from master after 30 minutes"
 echo "Worker node initialization complete! Ready to join cluster manually."
 exit 1

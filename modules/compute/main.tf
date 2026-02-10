@@ -130,6 +130,10 @@ resource "aws_autoscaling_group" "worker" {
     version = "$Latest"
   }
 
+  health_check_type         = "EC2"
+  health_check_grace_period = 600
+  wait_for_capacity_timeout = "15m"
+
   tag {
     key                 = "Name"
     value               = "${var.cluster_name}-worker"
@@ -141,4 +145,6 @@ resource "aws_autoscaling_group" "worker" {
     value               = "worker"
     propagate_at_launch = true
   }
+
+  depends_on = [aws_autoscaling_group.master]
 }
