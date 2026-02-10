@@ -44,6 +44,8 @@ output "next_steps" {
     Master ASG: ${module.compute.master_asg_name}
     Worker ASG: ${module.compute.worker_asg_name}
     
+    IMPORTANT: Wait 5-10 minutes for master initialization to complete!
+    
     Connect via SSM:
     
     1. Get master instance ID:
@@ -54,19 +56,28 @@ output "next_steps" {
     2. Connect to master:
        aws ssm start-session --target $MASTER_ID
     
-    3. Check cluster status:
+    3. Check initialization status:
+       sudo tail -f /var/log/cloud-init-output.log
+       # Wait until you see "Master node initialization complete!"
+    
+    4. Verify kubeconfig exists:
+       ls -la /home/ubuntu/.kube/config
+    
+    5. Switch to ubuntu user and check cluster:
+       sudo su - ubuntu
        kubectl get nodes
        cat /home/ubuntu/join-command.sh
     
-    4. Get worker instance ID and join cluster:
+    6. Get worker instance ID and join cluster:
        WORKER_ID=$(aws autoscaling describe-auto-scaling-groups \
          --auto-scaling-group-names ${module.compute.worker_asg_name} \
          --query 'AutoScalingGroups[0].Instances[0].InstanceId' --output text)
        
        aws ssm start-session --target $WORKER_ID
-       sudo $(cat /home/ubuntu/join-command.sh)
+       sudo bash /home/ubuntu/join-command.sh
     
-    5. Verify cluster:
+    7. Verify cluster (on master as ubuntu user):
+       sudo su - ubuntu
        kubectl get nodes
        kubectl get pods -A
   EOT
