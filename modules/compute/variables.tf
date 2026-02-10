@@ -56,6 +56,12 @@ variable "kubernetes_version" {
   type        = string
 }
 
+variable "master_as_worker" {
+  description = "Allow master to run workloads"
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Common tags"
   type        = map(string)

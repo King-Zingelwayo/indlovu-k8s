@@ -57,3 +57,9 @@ variable "worker_max_size" {
   type        = number
   default     = 3
 }
+
+variable "master_as_worker" {
+  description = "Allow master node to run workloads"
+  type        = bool
+  default     = false
+}

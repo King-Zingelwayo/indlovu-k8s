@@ -41,6 +41,7 @@ resource "aws_launch_template" "master" {
   user_data = base64encode(templatefile("${path.root}/scripts/master-init.sh", {
     pod_network_cidr   = var.pod_network_cidr
     kubernetes_version = var.kubernetes_version
+    master_as_worker   = var.master_as_worker
   }))
 
   tag_specifications {

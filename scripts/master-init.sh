@@ -60,6 +60,12 @@ export KUBECONFIG=/etc/kubernetes/admin.conf
 # Install Flannel CNI
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
 
+# Allow master to run workloads if enabled
+if [ "${master_as_worker}" = "true" ]; then
+  kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+  echo "Master node configured to run workloads"
+fi
+
 # Generate join command
 kubeadm token create --print-join-command > /home/ubuntu/join-command.sh
 chmod +x /home/ubuntu/join-command.sh

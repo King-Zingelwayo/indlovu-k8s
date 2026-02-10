@@ -5,6 +5,7 @@ worker_instance_type = "t3.medium"
 worker_count         = 0
 worker_min_size      = 0
 worker_max_size      = 3
+master_as_worker     = true
 pod_network_cidr     = "10.244.0.0/16"
 vpc_cidr             = "10.0.0.0/16"
 kubernetes_version   = "1.28"

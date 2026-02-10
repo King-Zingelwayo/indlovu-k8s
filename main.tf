@@ -41,6 +41,7 @@ module "compute" {
   worker_max_size      = var.worker_max_size
   pod_network_cidr     = var.pod_network_cidr
   kubernetes_version   = var.kubernetes_version
+  master_as_worker     = var.master_as_worker
   tags                 = local.common_tags
 
   depends_on = [module.nat]
