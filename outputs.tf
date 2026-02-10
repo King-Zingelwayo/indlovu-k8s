@@ -9,13 +9,13 @@ output "worker_asg_name" {
 }
 
 output "ssm_connect_master" {
-  description = "SSM command for master"
-  value       = "aws ssm start-session --target <INSTANCE_ID>"
+  description = "Command to connect to master via SSM"
+  value       = "MASTER_ID=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names ${module.compute.master_asg_name} --query 'AutoScalingGroups[0].Instances[0].InstanceId' --output text) && aws ssm start-session --target $MASTER_ID"
 }
 
 output "ssm_connect_worker" {
-  description = "SSM command for worker"
-  value       = "aws ssm start-session --target <INSTANCE_ID>"
+  description = "Command to connect to worker via SSM"
+  value       = "WORKER_ID=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names ${module.compute.worker_asg_name} --query 'AutoScalingGroups[0].Instances[0].InstanceId' --output text) && aws ssm start-session --target $WORKER_ID"
 }
 
 output "cluster_name" {
@@ -45,18 +45,29 @@ output "next_steps" {
     Worker ASG: ${module.compute.worker_asg_name}
     
     Connect via SSM:
-    1. Get instance IDs:
-       aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names ${module.compute.master_asg_name}
+    
+    1. Get master instance ID:
+       MASTER_ID=$(aws autoscaling describe-auto-scaling-groups \
+         --auto-scaling-group-names ${module.compute.master_asg_name} \
+         --query 'AutoScalingGroups[0].Instances[0].InstanceId' --output text)
     
     2. Connect to master:
-       aws ssm start-session --target <MASTER_INSTANCE_ID>
+       aws ssm start-session --target $MASTER_ID
     
-    3. Check cluster:
+    3. Check cluster status:
        kubectl get nodes
        cat /home/ubuntu/join-command.sh
     
-    4. Connect to worker and join cluster
+    4. Get worker instance ID and join cluster:
+       WORKER_ID=$(aws autoscaling describe-auto-scaling-groups \
+         --auto-scaling-group-names ${module.compute.worker_asg_name} \
+         --query 'AutoScalingGroups[0].Instances[0].InstanceId' --output text)
+       
+       aws ssm start-session --target $WORKER_ID
+       sudo $(cat /home/ubuntu/join-command.sh)
     
-    See QUICKSTART.md for detailed instructions.
+    5. Verify cluster:
+       kubectl get nodes
+       kubectl get pods -A
   EOT
 }

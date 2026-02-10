@@ -37,7 +37,7 @@ variable "vpc_cidr" {
 variable "kubernetes_version" {
   description = "Kubernetes version to install"
   type        = string
-  default     = "1.34.0"
+  default     = "1.28"
 }
 
 variable "worker_count" {
