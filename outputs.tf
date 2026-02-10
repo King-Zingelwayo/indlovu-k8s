@@ -44,41 +44,23 @@ output "next_steps" {
     Master ASG: ${module.compute.master_asg_name}
     Worker ASG: ${module.compute.worker_asg_name}
     
-    IMPORTANT: Wait 5-10 minutes for master initialization to complete!
+    Configuration:
+    - Master as Worker: ${var.master_as_worker}
+    - Worker Count: ${var.worker_count}
+    - Auto-join: Enabled (workers join automatically)
     
-    Connect via SSM:
+    === Connect to Master ===
+    MASTER_ID=$(aws autoscaling describe-auto-scaling-groups \
+      --auto-scaling-group-names ${module.compute.master_asg_name} \
+      --query 'AutoScalingGroups[0].Instances[0].InstanceId' --output text)
+    aws ssm start-session --target $MASTER_ID
     
-    1. Get master instance ID:
-       MASTER_ID=$(aws autoscaling describe-auto-scaling-groups \
-         --auto-scaling-group-names ${module.compute.master_asg_name} \
-         --query 'AutoScalingGroups[0].Instances[0].InstanceId' --output text)
+    === Verify Cluster (as ubuntu user) ===
+    sudo su - ubuntu
+    kubectl get nodes
+    kubectl get pods -A
     
-    2. Connect to master:
-       aws ssm start-session --target $MASTER_ID
-    
-    3. Check initialization status:
-       sudo tail -f /var/log/cloud-init-output.log
-       # Wait until you see "Master node initialization complete!"
-    
-    4. Verify kubeconfig exists:
-       ls -la /home/ubuntu/.kube/config
-    
-    5. Switch to ubuntu user and check cluster:
-       sudo su - ubuntu
-       kubectl get nodes
-       cat /home/ubuntu/join-command.sh
-    
-    6. Get worker instance ID and join cluster:
-       WORKER_ID=$(aws autoscaling describe-auto-scaling-groups \
-         --auto-scaling-group-names ${module.compute.worker_asg_name} \
-         --query 'AutoScalingGroups[0].Instances[0].InstanceId' --output text)
-       
-       aws ssm start-session --target $WORKER_ID
-       sudo bash /home/ubuntu/join-command.sh
-    
-    7. Verify cluster (on master as ubuntu user):
-       sudo su - ubuntu
-       kubectl get nodes
-       kubectl get pods -A
+    Note: Workers automatically join the cluster using SSM Parameter Store.
+          Wait 5-10 minutes for master init, then workers will join automatically.
   EOT
 }

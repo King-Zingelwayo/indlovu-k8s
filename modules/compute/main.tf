@@ -42,6 +42,7 @@ resource "aws_launch_template" "master" {
     pod_network_cidr   = var.pod_network_cidr
     kubernetes_version = var.kubernetes_version
     master_as_worker   = var.master_as_worker
+    cluster_name       = var.cluster_name
   }))
 
   tag_specifications {
@@ -80,6 +81,7 @@ resource "aws_launch_template" "worker" {
 
   user_data = base64encode(templatefile("${path.root}/scripts/worker-init.sh", {
     kubernetes_version = var.kubernetes_version
+    cluster_name       = var.cluster_name
   }))
 
   tag_specifications {

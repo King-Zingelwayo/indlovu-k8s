@@ -128,6 +128,26 @@ resource "aws_iam_role_policy_attachment" "ssm_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+resource "aws_iam_role_policy" "ssm_parameter_access" {
+  name = "${var.cluster_name}-ssm-parameter-access"
+  role = aws_iam_role.ssm_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:PutParameter",
+          "ssm:GetParameter",
+          "ssm:DeleteParameter"
+        ]
+        Resource = "arn:aws:ssm:*:*:parameter/k8s/${var.cluster_name}/*"
+      }
+    ]
+  })
+}
+
 resource "aws_iam_instance_profile" "ssm_profile" {
   name = "${var.cluster_name}-ssm-profile"
   role = aws_iam_role.ssm_role.name

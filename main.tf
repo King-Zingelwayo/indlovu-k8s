@@ -28,21 +28,21 @@ resource "aws_route" "private_nat" {
   network_interface_id   = module.nat.nat_primary_network_interface_id
 }
 
-module "compute" {
-  source               = "./modules/compute"
-  cluster_name         = var.cluster_name
-  private_subnet_id    = module.vpc.private_subnet_id
-  k8s_sg_id            = module.security.k8s_sg_id
-  ssm_profile_name     = module.security.ssm_profile_name
-  master_instance_type = var.master_instance_type
-  worker_instance_type = var.worker_instance_type
-  worker_count         = var.worker_count
-  worker_min_size      = var.worker_min_size
-  worker_max_size      = var.worker_max_size
-  pod_network_cidr     = var.pod_network_cidr
-  kubernetes_version   = var.kubernetes_version
-  master_as_worker     = var.master_as_worker
-  tags                 = local.common_tags
+# module "compute" {
+#   source               = "./modules/compute"
+#   cluster_name         = var.cluster_name
+#   private_subnet_id    = module.vpc.private_subnet_id
+#   k8s_sg_id            = module.security.k8s_sg_id
+#   ssm_profile_name     = module.security.ssm_profile_name
+#   master_instance_type = var.master_instance_type
+#   worker_instance_type = var.worker_instance_type
+#   worker_count         = var.worker_count
+#   worker_min_size      = var.worker_min_size
+#   worker_max_size      = var.worker_max_size
+#   pod_network_cidr     = var.pod_network_cidr
+#   kubernetes_version   = var.kubernetes_version
+#   master_as_worker     = var.master_as_worker
+#   tags                 = local.common_tags
 
-  depends_on = [module.nat]
-}
+#   depends_on = [module.nat]
+# }

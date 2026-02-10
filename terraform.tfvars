@@ -8,4 +8,4 @@ worker_max_size      = 3
 master_as_worker     = false
 pod_network_cidr     = "10.244.0.0/16"
 vpc_cidr             = "10.0.0.0/16"
-kubernetes_version   = "1.34"
+kubernetes_version   = "1.28"

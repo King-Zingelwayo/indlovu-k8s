@@ -75,4 +75,13 @@ kubeadm token create --print-join-command > /home/ubuntu/join-command.sh
 chmod +x /home/ubuntu/join-command.sh
 chown ubuntu:ubuntu /home/ubuntu/join-command.sh
 
+# Store join command in SSM Parameter Store for workers to retrieve
+JOIN_COMMAND=$(cat /home/ubuntu/join-command.sh)
+aws ssm put-parameter \
+  --name "/k8s/${cluster_name}/join-command" \
+  --value "$JOIN_COMMAND" \
+  --type "SecureString" \
+  --overwrite \
+  --region $(curl -s http://169.254.169.254/latest/meta-data/placement/region)
+
 echo "Master node initialization complete!"
